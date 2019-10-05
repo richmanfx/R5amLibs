@@ -1,8 +1,8 @@
 package ru.r5am;
 
+import java.io.File;
 import java.util.Map;
 import java.io.IOException;
-import java.io.InputStream;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,19 +20,20 @@ public class JsonFileWork {
      */
     public Map<String, Map<String, String>> readMapStringMap(String jsonFileName)  throws IOException {
 
-        log.info("Read Map<String, Map<String, String>> from JSON file");
+        log.debug("readMapStringMap(): Read Map<String, Map<String, String>> from JSON file");
 
         Map<String, Map<String, String>> data;
         ObjectMapper objectMapper = new ObjectMapper();
-        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(jsonFileName);
-
-        if (null == inputStream) {
+        File file;
+        try {
+            file = new File(getClass().getClassLoader().getResource(jsonFileName).getFile());
+        } catch (NullPointerException ex) {
             log.error("File '{}' not found", jsonFileName);
-            throw new IOException();
-        } else {
-            data = objectMapper.readValue(inputStream, new TypeReference<Map<String, Map<String, String>>>(){});
-            log.info("Json MAP:\n{}", data);
+            throw new NullPointerException();
         }
+
+        data = objectMapper.readValue(file, new TypeReference<Map<String, Map<String, String>>>(){});
+        log.debug("Json MAP:\n{}", data);
 
         return data;
     }
